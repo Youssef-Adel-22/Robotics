@@ -1,0 +1,152 @@
+(footprint "N20DCMotor"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 -0.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "f4b3d296-378c-4441-ae92-c3f05440fad8")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Untitled"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "8c977dca-1780-45e7-a4f2-bb8eff273a91")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "079a8c90-30f3-49f2-ab62-bc7519d71ce9")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "91fc30bb-fadc-41ba-ac03-0552f191588f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr through_hole)
+	(fp_rect
+		(start -6 -7.5)
+		(end 6 8)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "7c9f4139-72bf-43e1-a941-5ad2c5b89de5")
+	)
+	(fp_circle
+		(center -6 -3.9)
+		(end -4.8 -3.9)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "Edge.Cuts")
+		(uuid "0574fb1d-85d3-45ec-a99c-8b8385ea5dda")
+	)
+	(fp_circle
+		(center -6 3.5)
+		(end -4.8 3.5)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "Edge.Cuts")
+		(uuid "94eb818b-8714-43cb-8363-9d8051542f60")
+	)
+	(fp_circle
+		(center 6 -3.9)
+		(end 7.2 -3.9)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "Edge.Cuts")
+		(uuid "fef6eb82-3450-4e7f-b25f-85c39f073cac")
+	)
+	(fp_circle
+		(center 6 3.5)
+		(end 7.2 3.5)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "Edge.Cuts")
+		(uuid "a824331d-1f1c-49eb-a1ff-22ea30df11c0")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "43a15e97-7ea1-4be0-adbd-557a348e0926")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" thru_hole oval
+		(at -3.9 -8 90)
+		(size 2.5 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "3b199034-f1a7-44a0-b8cc-7ef8751b9e74")
+	)
+	(pad "2" thru_hole oval
+		(at 3.9 -8 90)
+		(size 2.5 1.7)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "2a7d73f1-15de-419b-9ae6-ef1bfe570bd1")
+	)
+	(embedded_fonts no)
+	(model "E:/PCB projects/Baords/LinefollowerV1_0/Lib/N20_DCMotor/N20 Motor.STEP"
+		(offset
+			(xyz 0 -17 5)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+)

@@ -1,0 +1,9 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "PhilsLibrary")(type "KiCad")(uri "${KIPRJMOD}/Lib/STM32BlackPill/PhilsLibrary.kicad_sym")(options "")(descr ""))
+  (lib (name "DRV8833")(type "KiCad")(uri "${KIPRJMOD}/Lib/DRV8833/DRV8833.kicad_sym")(options "")(descr ""))
+  (lib (name "SX1308")(type "KiCad")(uri "${KIPRJMOD}/Lib/SX1308/SX1308.kicad_sym")(options "")(descr ""))
+  (lib (name "QTR-8")(type "KiCad")(uri "${KIPRJMOD}/Lib/QTR-8RC/QTR-8.kicad_sym")(options "")(descr ""))
+  (lib (name "B2B-XH-A")(type "KiCad")(uri "${KIPRJMOD}/Lib/B2B_XH_A/B2B-XH-A.kicad_sym")(options "")(descr ""))
+  (lib (name "B4B-XH-A")(type "KiCad")(uri "${KIPRJMOD}/Lib/B4B_XH_A/B4B-XH-A.kicad_sym")(options "")(descr ""))
+)

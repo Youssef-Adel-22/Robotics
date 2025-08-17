@@ -1,0 +1,9 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "STM32BlackPill")(type "KiCad")(uri "${KIPRJMOD}//Lib/STM32BlackPill")(options "")(descr ""))
+  (lib (name "DRV8833")(type "KiCad")(uri "${KIPRJMOD}/Lib/DRV8833")(options "")(descr ""))
+  (lib (name "Library")(type "KiCad")(uri "${KIPRJMOD}/Lib/SX1308")(options "")(descr ""))
+  (lib (name "B2B_XH_A")(type "KiCad")(uri "${KIPRJMOD}/Lib/B2B_XH_A")(options "")(descr ""))
+  (lib (name "B4B_XH_A")(type "KiCad")(uri "${KIPRJMOD}/Lib/B4B_XH_A")(options "")(descr ""))
+  (lib (name "N20_DCMotor")(type "KiCad")(uri "${KIPRJMOD}/Lib/N20_DCMotor")(options "")(descr ""))
+)
