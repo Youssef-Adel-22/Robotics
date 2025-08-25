@@ -6,4 +6,5 @@
   (lib (name "B2B_XH_A")(type "KiCad")(uri "${KIPRJMOD}/Lib/B2B_XH_A")(options "")(descr ""))
   (lib (name "B4B_XH_A")(type "KiCad")(uri "${KIPRJMOD}/Lib/B4B_XH_A")(options "")(descr ""))
   (lib (name "N20_DCMotor")(type "KiCad")(uri "${KIPRJMOD}/Lib/N20_DCMotor")(options "")(descr ""))
+  (lib (name "CytronLineMaker")(type "KiCad")(uri "${KIPRJMOD}/Lib/CytronLineMaker.pretty")(options "")(descr ""))
 )
