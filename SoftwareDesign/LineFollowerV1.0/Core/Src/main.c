@@ -20,7 +20,8 @@
 #include "main.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stm32f4xx_hal_flash.h"
+#include "stm32f4xx_hal_flash_ex.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -85,6 +86,7 @@ static void MX_TIM2_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 void Forwrad(uint16_t RSpeed,uint16_t LSpeed);
+uint32_t Flash_Write_Data (uint32_t StartSectorAddress, volatile uint16_t *Data);
 //void NeoPixel_SetPixel(uint8_t pixel, uint8_t red, uint8_t green, uint8_t blue);
 //void NeoPixel_Show(void);
 //void NeoPixel_Clear(void);
@@ -137,7 +139,7 @@ void LineFollowerCalibration(void)
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		  HAL_Delay(100);
 	  }
-	  //Forwrad(1000,0);
+	  Forwrad(1000,0);
 	  for(i =0 ;i<65535; i++)
 	  {
 		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
@@ -172,8 +174,50 @@ void LineFollowerCalibration(void)
 	  IR_buff[3][5]= IR_buff[2][5]+(IR_buff[1][5]-IR_buff[2][5])/2;
 	  IR_buff[3][6]= IR_buff[2][6]+(IR_buff[1][6]-IR_buff[2][6])/2;
 	  IR_buff[3][7]= IR_buff[2][7]+(IR_buff[1][7]-IR_buff[2][7])/2;
-
+	  Flash_Write_Data(0x08020000,&IR_buff[3][0]);
 	  Forwrad(0,0);
+}
+
+uint32_t Flash_Write_Data (uint32_t StartSectorAddress, volatile uint16_t *Data)
+{
+
+	int sofar=0;
+	 /* Unlock the Flash to enable the flash control register access *************/
+	  HAL_FLASH_Unlock();
+	  /* Erase the user Flash area */
+	  FLASH_Erase_Sector(5U, FLASH_VOLTAGE_RANGE_3);
+
+	  /* Program the user Flash area word by word
+	    (area defined by FLASH_USER_START_ADDR and FLASH_USER_END_ADDR) ***********/
+	   while (sofar<8)
+	   {
+	     if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD, StartSectorAddress, Data[sofar]) == HAL_OK)
+	     {
+	    	 StartSectorAddress += 2;  // use StartPageAddress += 2 for half word and 8 for double word
+	    	 sofar++;
+	     }
+	     else
+	     {
+	       /* Error occurred while writing data in Flash memory*/
+	    	 return HAL_FLASH_GetError ();
+	     }
+	   }
+
+	  /* Lock the Flash to disable the flash control register access (recommended
+	     to protect the FLASH memory against possible unwanted operation) *********/
+	  HAL_FLASH_Lock();
+
+	   return 0;
+}
+void Flash_Read_Data (uint32_t StartSectorAddress,volatile uint16_t *RxBuf, uint16_t numberofwords)
+{
+	while (1)
+	{
+		*RxBuf = *(__IO uint16_t *)StartSectorAddress;
+		StartSectorAddress += 2;
+		RxBuf++;
+		if (!(numberofwords--)) break;
+	}
 }
 /* USER CODE END 0 */
 
@@ -217,7 +261,7 @@ int main(void)
 //  HAL_GPIO_TogglePin(IR_ON_GPIO_Port, IR_ON_Pin);
 //  HAL_Delay(1000);
 //  }
-
+  Flash_Read_Data (0x08020000, &IR_buff[3][0], 8);
 
   HAL_GPIO_WritePin(IR_ON_GPIO_Port, IR_ON_Pin,1);
   /* Start ADC conversion with DMA */
