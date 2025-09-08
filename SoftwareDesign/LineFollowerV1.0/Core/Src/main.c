@@ -33,7 +33,7 @@
 /* USER CODE BEGIN PD */
 #define TRUE 	1
 #define FALSE 	0
-/*// NeoPixel configuration
+// NeoPixel configuration
 #define NUM_PIXELS 8
 #define PIXEL_BYTES 3  // RGB
 #define SPI_BYTES_PER_BIT 3  // Each bit encoded as 3 SPI bytes
@@ -41,7 +41,7 @@
 #define RESET_BYTES 50  // Reset pulse (>50μs)
 #define CODE0 0b11100000
 #define CODE1 0b1111000
-*/
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -64,8 +64,8 @@ volatile uint16_t IR_buff[4][8]={0};
 volatile uint8_t IR_Readed = FALSE;
 volatile uint8_t IR_DigValue = 0;
 volatile uint64_t pressTime=0;
-/*
- Color structure
+
+ //Color structure
 typedef struct {
     uint8_t green;
     uint8_t red;
@@ -73,7 +73,7 @@ typedef struct {
 } RGB_Color;
 uint8_t spi_buffer[TOTAL_BYTES + RESET_BYTES];
 RGB_Color pixels[NUM_PIXELS];
-*/
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -87,9 +87,9 @@ static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
 void Forwrad(uint16_t RSpeed,uint16_t LSpeed);
 uint32_t Flash_Write_Data (uint32_t StartSectorAddress, volatile uint16_t *Data);
-//void NeoPixel_SetPixel(uint8_t pixel, uint8_t red, uint8_t green, uint8_t blue);
-//void NeoPixel_Show(void);
-//void NeoPixel_Clear(void);
+void NeoPixel_SetPixel(uint8_t pixel, uint8_t red, uint8_t green, uint8_t blue);
+void NeoPixel_Show(void);
+void NeoPixel_Clear(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -274,6 +274,8 @@ int main(void)
   TIM1->CCR2 = 0;
   TIM1->CCR3 = 0;
   TIM1->CCR4 = 0;
+  NeoPixel_SetPixel(0, 255, 0, 0);
+  NeoPixel_Show();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -718,7 +720,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*
+
 void NeoPixel_SetPixel(uint8_t pixel, uint8_t red, uint8_t green, uint8_t blue)
 {
     if (pixel >= NUM_PIXELS) return;
@@ -771,7 +773,7 @@ void NeoPixel_Clear(void)
         pixels[i].blue = 0;
     }
 }
-*/
+
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
 __NOP();
