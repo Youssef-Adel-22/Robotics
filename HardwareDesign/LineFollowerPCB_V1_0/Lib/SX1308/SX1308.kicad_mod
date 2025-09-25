@@ -1,4 +1,4 @@
-(footprint "Untitled"
+(footprint "SX1308"
 	(version 20241229)
 	(generator "pcbnew")
 	(generator_version "9.0")
@@ -9,7 +9,10 @@
 		(layer "F.SilkS")
 		(uuid "12ab6420-9310-4590-b630-a08676da0843")
 		(effects
-			(font (size 1 1) (thickness 0.1))
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
 		)
 	)
 	(property "Value" "Untitled"
@@ -18,7 +21,10 @@
 		(layer "F.Fab")
 		(uuid "027e3870-d700-4c7f-b749-e4d503c4f711")
 		(effects
-			(font (size 1 1) (thickness 0.15))
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
 		)
 	)
 	(property "Datasheet" ""
@@ -28,7 +34,10 @@
 		(hide yes)
 		(uuid "856aa485-bb7f-414a-8411-bc3292c55af1")
 		(effects
-			(font (size 1 1) (thickness 0.15))
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
 		)
 	)
 	(property "Description" ""
@@ -38,43 +47,61 @@
 		(hide yes)
 		(uuid "fdc18507-f2be-440c-9c04-bebbcd8c5383")
 		(effects
-			(font (size 1 1) (thickness 0.15))
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
 		)
 	)
 	(attr smd)
 	(fp_rect
-		(start -10.45 -6.6)
-		(end 10.15 6.4)
-		(stroke (width 0.1) (type default))
+		(start -10.35 -6.6)
+		(end 10.25 6.4)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
 		(fill no)
 		(layer "F.SilkS")
 		(uuid "56ec8efb-016a-4fd7-9141-99acc7da8cac")
 	)
 	(fp_line
 		(start -10.67 -6.85)
-		(end -10.67 6.85)
-		(stroke (width 0.05) (type solid))
+		(end -10.67 6.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
 		(layer "F.CrtYd")
 		(uuid "7265d336-21a6-4a73-bcbc-b88cce0f293a")
 	)
 	(fp_line
-		(start -10.67 6.85)
-		(end 10.67 6.85)
-		(stroke (width 0.05) (type solid))
+		(start -10.67 6.75)
+		(end 10.5 6.75)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
 		(layer "F.CrtYd")
 		(uuid "9e3c7925-3bc0-4952-91dc-bc9c83cba497")
 	)
 	(fp_line
-		(start 10.67 -6.85)
+		(start 10.5 -6.85)
 		(end -10.67 -6.85)
-		(stroke (width 0.05) (type solid))
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
 		(layer "F.CrtYd")
 		(uuid "7997611a-3e26-4663-8a4a-aabebd35fca8")
 	)
 	(fp_line
-		(start 10.67 6.85)
-		(end 10.67 -6.85)
-		(stroke (width 0.05) (type solid))
+		(start 10.5 6.75)
+		(end 10.5 -6.85)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
 		(layer "F.CrtYd")
 		(uuid "4f3a0222-b5a1-41bb-afbe-2ceffa3b04a8")
 	)
@@ -83,7 +110,10 @@
 		(layer "F.Fab")
 		(uuid "eecb97eb-6b1c-46c7-8eb2-cdcbe0f9402c")
 		(effects
-			(font (size 1 1) (thickness 0.15))
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
 		)
 	)
 	(fp_text user "${REFERENCE}"
@@ -92,7 +122,10 @@
 		(layer "F.Fab")
 		(uuid "ef44217e-4d8c-49e3-827f-25b2b2aa0618")
 		(effects
-			(font (size 1 1) (thickness 0.15))
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
 		)
 	)
 	(pad "1" thru_hole oval
@@ -102,7 +135,6 @@
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers yes)
 		(keep_end_layers yes)
-		(zone_layer_connections)
 		(uuid "bc7805dd-d93f-4e96-8ed0-12571f0fb6a0")
 	)
 	(pad "1" thru_hole oval

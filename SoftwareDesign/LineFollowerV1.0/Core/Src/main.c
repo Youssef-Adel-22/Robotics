@@ -35,10 +35,18 @@
 /* USER CODE BEGIN PD */
 #define TRUE 	1
 #define FALSE 	0
+/* DC MOTORS Private define */
 #define RSPEED 900
-#define LSPEED 950
+#define LSPEED 900 //950
+#define SET_SPEED 950
+#define MIN_SPEED 400
+#define MAX_SPEED 1200
+#define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+#define PID_P 30
+#define PID_ERROR_SETPOINT 7
+/* ADC Private define */
 #define ADCREADTIMES 5
-// NeoPixel configuration
+/* NeoPixel Private define */
 #define NUM_PIXELS 8
 #define PIXEL_BYTES 3  // RGB
 #define TOTAL_BYTES (NUM_PIXELS * PIXEL_BYTES * 8)
@@ -64,6 +72,7 @@ TIM_HandleTypeDef htim1;
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
+/* States of State machine variable */
 volatile typedef enum
 {
 	LINEFOLLOWER_STARTUP,
@@ -72,17 +81,21 @@ volatile typedef enum
 	LINEFOLLOWER_RUN
 }LineFollowerState_t;
 LineFollowerState_t LineFollowerState= LINEFOLLOWER_STARTUP;
+/* IR sensor variables and ADC*/
 volatile uint16_t IR_buff[4][8]={0};
 volatile uint8_t IR_Readed = FALSE;
-volatile uint8_t ADCReadsTime = ADCREADTIMES;
-volatile uint8_t NeoPixel_TXCplt = FALSE;
 volatile uint8_t IR_DigValue = 0;
 volatile uint8_t previousIR_DigValue = 0;
+volatile uint8_t ADCReadsTime= ADCREADTIMES;
+volatile uint8_t PID_Error_g8 =0;
+/* User button variables */
 volatile uint64_t pressTime=0;
+/* PWM speed variables */
 volatile int16_t speedCorrection = 0;
 
-
-uint8_t spi_buffer[TOTAL_BYTES + RESET_BYTES];
+/* Neopixel variables */
+volatile uint8_t NeoPixel_TXCplt = FALSE;
+uint8_t spi_buffer[TOTAL_BYTES + RESET_BYTES]={0};
 static const uint8_t blueColor5[24]= {CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
 		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
 		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE1}; //0b0000001 1U
@@ -109,32 +122,27 @@ void NeoPixel_ShowBlue(uint8_t bluePixels);
 /* USER CODE BEGIN 0 */
 void Forwrad(uint16_t RSpeed,uint16_t LSpeed)
 {
-	if((LSpeed <1200) && (RSpeed <1200))
-	{
+
 		TIM1->CCR1 = 0;
 		TIM1->CCR3 = 0;
 		TIM1->CCR2 = RSpeed;
 		TIM1->CCR4 = LSpeed;
-		//Turn OFF the Blue LED
-		//HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 1);
-	}
-	else
-	{
-		//Turn ON the Blue LED
-		//HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, 0);
-	}
 }
-void LineFollowerRun(void)
+void Left()
 {
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)IR_buff, 8);
-	while(IR_Readed != TRUE);
-	IR_DigValue = ((IR_buff[0][7]>IR_buff[3][7])<<7)|((IR_buff[0][6]>IR_buff[3][6])<<6)|((IR_buff[0][5]>IR_buff[3][5])<<5)|((IR_buff[0][4]>IR_buff[3][4])<<4)|((IR_buff[0][3]>IR_buff[3][3])<<3)|((IR_buff[0][2]>IR_buff[3][2])<<2)|((IR_buff[0][1]>IR_buff[3][1])<<1)|(IR_buff[0][0]>IR_buff[3][0]);
-	__NOP();
-	switch(IR_DigValue)
-	{
-	case 0b11111111:
-		//LineFollowerStop();
-	}
+
+		TIM1->CCR1 = 0;
+		TIM1->CCR3 = 800;
+		TIM1->CCR2 = 1200;
+		TIM1->CCR4 = 0;
+}
+void Right()
+{
+
+		TIM1->CCR1 = 800;
+		TIM1->CCR3 = 0;
+		TIM1->CCR2 = 0;
+		TIM1->CCR4 = 1200;
 }
 void LineFollowerCalibration(void)
 {
@@ -269,7 +277,8 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM1_Init();
   /* USER CODE BEGIN 2 */
-
+uint8_t i_l8=0;
+uint8_t sum_l8=0;
 
   /* USER CODE END 2 */
 
@@ -357,23 +366,21 @@ int main(void)
 					switch(IR_DigValue)
 					{
 					case 0b00000001:
-						speedCorrection = -200;
+						Right();
 						break;
 					case 0b10000000:
-						speedCorrection = 200;
+						Left();
 						break;
 					default:
-					speedCorrection= 	(IR_buff[0][0]>IR_buff[3][0])*75
-										+(IR_buff[0][1]>IR_buff[3][1])*60
-										+(IR_buff[0][2]>IR_buff[3][2])*40
-										+(IR_buff[0][3]>IR_buff[3][3])*25
-										+(IR_buff[0][4]>IR_buff[3][4])*-25
-										+(IR_buff[0][5]>IR_buff[3][5])*-40
-										+(IR_buff[0][6]>IR_buff[3][6])*-60
-										+(IR_buff[0][7]>IR_buff[3][7])*-75 ;
+						for(i_l8=0,sum_l8=0 ; i_l8<8 ; i_l8++)
+						{
+						    (IR_DigValue & 1<<i_l8)?(sum_l8+=i_l8*2): 0;
+						}
+						PID_Error_g8 = sum_l8/__builtin_popcount(IR_DigValue);
+						speedCorrection= PID_P * (PID_Error_g8-PID_ERROR_SETPOINT)  ;
 					break;
 					}
-					Forwrad((RSPEED-speedCorrection),(LSPEED+speedCorrection));
+					Forwrad(CONSTRAIN((SET_SPEED-speedCorrection),MIN_SPEED,MAX_SPEED),CONSTRAIN((SET_SPEED+speedCorrection),MIN_SPEED,MAX_SPEED));
 					(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowBlue(IR_DigValue)): NULL;
 					ADCReadsTime = ADCREADTIMES;
 				}

@@ -55,7 +55,18 @@
 	)
 	(attr through_hole)
 	(fp_rect
-		(start -6 -7.5)
+		(start -15 -5.5)
+		(end 15 5.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "ba62d56a-8e50-4255-808b-513d30667721")
+	)
+	(fp_rect
+		(start -6 -6.5)
 		(end 6 8)
 		(stroke
 			(width 0.1)
@@ -66,48 +77,26 @@
 		(uuid "7c9f4139-72bf-43e1-a941-5ad2c5b89de5")
 	)
 	(fp_circle
-		(center -6 -3.9)
-		(end -4.8 -3.9)
+		(center -11.5 0)
+		(end -9 0)
 		(stroke
-			(width 0.05)
+			(width 0.1)
 			(type solid)
 		)
 		(fill no)
 		(layer "Edge.Cuts")
-		(uuid "0574fb1d-85d3-45ec-a99c-8b8385ea5dda")
+		(uuid "cdbab61c-04fb-4c5e-a6dd-fdeca6b8b990")
 	)
 	(fp_circle
-		(center -6 3.5)
-		(end -4.8 3.5)
+		(center 11.5 0)
+		(end 14 0)
 		(stroke
-			(width 0.05)
+			(width 0.1)
 			(type solid)
 		)
 		(fill no)
 		(layer "Edge.Cuts")
-		(uuid "94eb818b-8714-43cb-8363-9d8051542f60")
-	)
-	(fp_circle
-		(center 6 -3.9)
-		(end 7.2 -3.9)
-		(stroke
-			(width 0.05)
-			(type solid)
-		)
-		(fill no)
-		(layer "Edge.Cuts")
-		(uuid "fef6eb82-3450-4e7f-b25f-85c39f073cac")
-	)
-	(fp_circle
-		(center 6 3.5)
-		(end 7.2 3.5)
-		(stroke
-			(width 0.05)
-			(type solid)
-		)
-		(fill no)
-		(layer "Edge.Cuts")
-		(uuid "a824331d-1f1c-49eb-a1ff-22ea30df11c0")
+		(uuid "e543b0bd-53c6-4816-9451-beae4dc5c8c0")
 	)
 	(fp_text user "${REFERENCE}"
 		(at 0 2.5 0)
@@ -118,6 +107,82 @@
 			(font
 				(size 1 1)
 				(thickness 0.15)
+			)
+		)
+	)
+	(dimension
+		(type orthogonal)
+		(layer "F.Fab")
+		(uuid "3a6f5cd9-98ba-44ae-a4e5-c7ddc6892895")
+		(pts
+			(xy 14 0) (xy -14 0)
+		)
+		(height 7)
+		(orientation 0)
+		(format
+			(prefix "")
+			(suffix "")
+			(units 3)
+			(units_format 0)
+			(precision 4)
+			(suppress_zeroes yes)
+		)
+		(style
+			(thickness 0.1)
+			(arrow_length 1.27)
+			(text_position_mode 0)
+			(arrow_direction outward)
+			(extension_height 0.58642)
+			(extension_offset 0.5)
+			(keep_text_aligned yes)
+		)
+		(gr_text "28"
+			(at 0 5.85 0)
+			(layer "F.Fab")
+			(uuid "3a6f5cd9-98ba-44ae-a4e5-c7ddc6892895")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+	)
+	(dimension
+		(type orthogonal)
+		(layer "F.Fab")
+		(uuid "94f8f535-6acf-4961-bfe3-05025c818165")
+		(pts
+			(xy 9 0) (xy -9 0)
+		)
+		(height -4)
+		(orientation 0)
+		(format
+			(prefix "")
+			(suffix "")
+			(units 3)
+			(units_format 0)
+			(precision 4)
+			(suppress_zeroes yes)
+		)
+		(style
+			(thickness 0.1)
+			(arrow_length 1.27)
+			(text_position_mode 0)
+			(arrow_direction outward)
+			(extension_height 0.58642)
+			(extension_offset 0.5)
+			(keep_text_aligned yes)
+		)
+		(gr_text "18"
+			(at 0 -5.15 0)
+			(layer "F.Fab")
+			(uuid "94f8f535-6acf-4961-bfe3-05025c818165")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
 			)
 		)
 	)
@@ -147,6 +212,17 @@
 		)
 		(rotate
 			(xyz -90 -0 -0)
+		)
+	)
+	(model "${KIPRJMOD}/Lib/N20_DCMotor/Bracket.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
 		)
 	)
 )
