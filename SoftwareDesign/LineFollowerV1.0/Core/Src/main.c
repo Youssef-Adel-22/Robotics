@@ -38,14 +38,14 @@
 /* DC MOTORS Private define */
 #define RSPEED 900
 #define LSPEED 900 //950
-#define SET_SPEED 950
+#define SET_SPEED 1000
 #define MIN_SPEED 400
 #define MAX_SPEED 1200
 #define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 #define PID_P 30
 #define PID_ERROR_SETPOINT 7
 /* ADC Private define */
-#define ADCREADTIMES 5
+#define ADCREADTIMES 2
 /* NeoPixel Private define */
 #define NUM_PIXELS 8
 #define PIXEL_BYTES 3  // RGB
@@ -366,10 +366,10 @@ uint8_t sum_l8=0;
 					switch(IR_DigValue)
 					{
 					case 0b00000001:
-						Right();
+						Left();
 						break;
 					case 0b10000000:
-						Left();
+						Right();
 						break;
 					default:
 						for(i_l8=0,sum_l8=0 ; i_l8<8 ; i_l8++)
@@ -378,9 +378,9 @@ uint8_t sum_l8=0;
 						}
 						PID_Error_g8 = sum_l8/__builtin_popcount(IR_DigValue);
 						speedCorrection= PID_P * (PID_Error_g8-PID_ERROR_SETPOINT)  ;
+						Forwrad(CONSTRAIN((SET_SPEED-speedCorrection),MIN_SPEED,MAX_SPEED),CONSTRAIN((SET_SPEED+speedCorrection),MIN_SPEED,MAX_SPEED));
 					break;
 					}
-					Forwrad(CONSTRAIN((SET_SPEED-speedCorrection),MIN_SPEED,MAX_SPEED),CONSTRAIN((SET_SPEED+speedCorrection),MIN_SPEED,MAX_SPEED));
 					(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowBlue(IR_DigValue)): NULL;
 					ADCReadsTime = ADCREADTIMES;
 				}

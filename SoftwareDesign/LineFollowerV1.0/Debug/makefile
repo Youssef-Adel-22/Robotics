@@ -60,8 +60,8 @@ all: main-build
 main-build: LineFollowerV1.0.elf secondary-outputs
 
 # Tool invocations
-LineFollowerV1.0.elf LineFollowerV1.0.map: $(OBJS) $(USER_OBJS) E:\GitHub\Robotics\SoftwareDesign\LineFollowerV1.0\STM32F401RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "LineFollowerV1.0.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"E:\GitHub\Robotics\SoftwareDesign\LineFollowerV1.0\STM32F401RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LineFollowerV1.0.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+LineFollowerV1.0.elf LineFollowerV1.0.map: $(OBJS) $(USER_OBJS) F:\GitHub\SoftwareDesign\LineFollowerV1.0\STM32F401RCTX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "LineFollowerV1.0.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"F:\GitHub\SoftwareDesign\LineFollowerV1.0\STM32F401RCTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="LineFollowerV1.0.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
