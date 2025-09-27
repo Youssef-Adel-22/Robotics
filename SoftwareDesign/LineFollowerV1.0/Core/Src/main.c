@@ -38,11 +38,12 @@
 /* DC MOTORS Private define */
 #define RSPEED 900
 #define LSPEED 900 //950
-#define SET_SPEED 1000
+#define SET_SPEED 1100
 #define MIN_SPEED 400
 #define MAX_SPEED 1200
 #define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
-#define PID_P 30
+#define PID_KP 30
+#define PID_KD 50
 #define PID_ERROR_SETPOINT 7
 /* ADC Private define */
 #define ADCREADTIMES 2
@@ -88,6 +89,7 @@ volatile uint8_t IR_DigValue = 0;
 volatile uint8_t previousIR_DigValue = 0;
 volatile uint8_t ADCReadsTime= ADCREADTIMES;
 volatile uint8_t PID_Error_g8 =0;
+volatile uint8_t lastPID_Error_g8 =0;
 /* User button variables */
 volatile uint64_t pressTime=0;
 /* PWM speed variables */
@@ -132,14 +134,14 @@ void Left()
 {
 
 		TIM1->CCR1 = 0;
-		TIM1->CCR3 = 800;
+		TIM1->CCR3 = 750;
 		TIM1->CCR2 = 1200;
 		TIM1->CCR4 = 0;
 }
 void Right()
 {
 
-		TIM1->CCR1 = 800;
+		TIM1->CCR1 = 750;
 		TIM1->CCR3 = 0;
 		TIM1->CCR2 = 0;
 		TIM1->CCR4 = 1200;
@@ -366,23 +368,32 @@ uint8_t sum_l8=0;
 					switch(IR_DigValue)
 					{
 					case 0b00000001:
+					//case 0b00000111:
+					//case 0b00001111:
+					//case 0b00011111:
 						Left();
+						lastPID_Error_g8 =2;
 						break;
 					case 0b10000000:
+					//case 0b11100000:
+					//case 0b11110000:
+					//case 0b11111000:
 						Right();
+						lastPID_Error_g8 =14;
 						break;
 					default:
 						for(i_l8=0,sum_l8=0 ; i_l8<8 ; i_l8++)
 						{
-						    (IR_DigValue & 1<<i_l8)?(sum_l8+=i_l8*2): 0;
+						    (IR_DigValue & 1<<i_l8)?(sum_l8+=(i_l8+1)*2): 0;
 						}
 						PID_Error_g8 = sum_l8/__builtin_popcount(IR_DigValue);
-						speedCorrection= PID_P * (PID_Error_g8-PID_ERROR_SETPOINT)  ;
+						speedCorrection= PID_KP * (PID_Error_g8-PID_ERROR_SETPOINT)+ PID_KD*(PID_Error_g8 - lastPID_Error_g8);  ;
 						Forwrad(CONSTRAIN((SET_SPEED-speedCorrection),MIN_SPEED,MAX_SPEED),CONSTRAIN((SET_SPEED+speedCorrection),MIN_SPEED,MAX_SPEED));
 					break;
 					}
 					(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowBlue(IR_DigValue)): NULL;
 					ADCReadsTime = ADCREADTIMES;
+					lastPID_Error_g8 =PID_Error_g8;
 				}
 				else
 				{
