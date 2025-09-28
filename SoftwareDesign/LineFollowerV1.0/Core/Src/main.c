@@ -36,15 +36,14 @@
 #define TRUE 	1
 #define FALSE 	0
 /* DC MOTORS Private define */
-#define RSPEED 900
-#define LSPEED 900 //950
-#define SET_SPEED 1100
-#define MIN_SPEED 400
+#define SET_SPEED 1090
+#define MIN_SPEED 700
 #define MAX_SPEED 1200
-#define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
+#define ROTATION_SPEED 800
 #define PID_KP 30
-#define PID_KD 50
+#define PID_KD 40
 #define PID_ERROR_SETPOINT 7
+#define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 /* ADC Private define */
 #define ADCREADTIMES 2
 /* NeoPixel Private define */
@@ -115,14 +114,16 @@ static void MX_SPI2_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_TIM1_Init(void);
 /* USER CODE BEGIN PFP */
-void Forwrad(uint16_t RSpeed,uint16_t LSpeed);
+static inline void Forwrad(uint16_t RSpeed,uint16_t LSpeed);
 uint32_t Flash_Write_Data (uint32_t StartSectorAddress, volatile uint16_t *Data);
 void NeoPixel_ShowBlue(uint8_t bluePixels);
+static inline void Right();
+static inline void Left();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-void Forwrad(uint16_t RSpeed,uint16_t LSpeed)
+static inline void Forwrad(uint16_t RSpeed,uint16_t LSpeed)
 {
 
 		TIM1->CCR1 = 0;
@@ -130,21 +131,21 @@ void Forwrad(uint16_t RSpeed,uint16_t LSpeed)
 		TIM1->CCR2 = RSpeed;
 		TIM1->CCR4 = LSpeed;
 }
-void Left()
+static inline void Left()
 {
 
 		TIM1->CCR1 = 0;
-		TIM1->CCR3 = 750;
-		TIM1->CCR2 = 1200;
+		TIM1->CCR3 = ROTATION_SPEED;
+		TIM1->CCR2 = MAX_SPEED;
 		TIM1->CCR4 = 0;
 }
-void Right()
+static inline void Right()
 {
 
-		TIM1->CCR1 = 750;
+		TIM1->CCR1 = ROTATION_SPEED;
 		TIM1->CCR3 = 0;
 		TIM1->CCR2 = 0;
-		TIM1->CCR4 = 1200;
+		TIM1->CCR4 = MAX_SPEED;
 }
 void LineFollowerCalibration(void)
 {
