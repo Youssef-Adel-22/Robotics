@@ -36,12 +36,12 @@
 #define TRUE 	1
 #define FALSE 	0
 /* DC MOTORS Private define */
-#define SET_SPEED 1090
+#define SET_SPEED 1100
 #define MIN_SPEED 700
 #define MAX_SPEED 1200
-#define ROTATION_SPEED 800
+#define ROTATION_SPEED 850
 #define PID_KP 30
-#define PID_KD 40
+#define PID_KD 50
 #define PID_ERROR_SETPOINT 7
 #define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 /* ADC Private define */
@@ -142,7 +142,7 @@ static inline void Left()
 static inline void Right()
 {
 
-		TIM1->CCR1 = ROTATION_SPEED;
+		TIM1->CCR1 = ROTATION_SPEED+40;
 		TIM1->CCR3 = 0;
 		TIM1->CCR2 = 0;
 		TIM1->CCR4 = MAX_SPEED;
@@ -369,16 +369,10 @@ uint8_t sum_l8=0;
 					switch(IR_DigValue)
 					{
 					case 0b00000001:
-					//case 0b00000111:
-					//case 0b00001111:
-					//case 0b00011111:
 						Left();
 						lastPID_Error_g8 =2;
 						break;
 					case 0b10000000:
-					//case 0b11100000:
-					//case 0b11110000:
-					//case 0b11111000:
 						Right();
 						lastPID_Error_g8 =14;
 						break;
