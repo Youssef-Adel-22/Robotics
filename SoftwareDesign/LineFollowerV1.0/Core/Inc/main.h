@@ -63,6 +63,8 @@ void Error_Handler(void);
 #define LED_GPIO_Port GPIOC
 #define IR_ON_Pin GPIO_PIN_15
 #define IR_ON_GPIO_Port GPIOC
+#define ULT_Pin GPIO_PIN_14
+#define ULT_GPIO_Port GPIOC
 #define SW1_Pin GPIO_PIN_0
 #define SW1_GPIO_Port GPIOA
 #define IN4_Pin GPIO_PIN_8
@@ -73,10 +75,8 @@ void Error_Handler(void);
 #define IN2_GPIO_Port GPIOA
 #define IN1_Pin GPIO_PIN_11
 #define IN1_GPIO_Port GPIOA
-#define EEP_Pin GPIO_PIN_12
-#define EEP_GPIO_Port GPIOA
-#define ULT_Pin GPIO_PIN_15
-#define ULT_GPIO_Port GPIOA
+#define EEP_Pin GPIO_PIN_13
+#define EEP_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

@@ -33,26 +33,27 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define TRUE 	1
-#define FALSE 	0
+#define TRUE 					1
+#define FALSE 					0
 /* DC MOTORS Private define */
-#define SET_SPEED 1100
-#define MIN_SPEED 700
-#define MAX_SPEED 1200
-#define ROTATION_SPEED 850
-#define PID_KP 30
-#define PID_KD 50
-#define PID_ERROR_SETPOINT 7
+#define SET_SPEED 				1100
+#define MIN_SPEED 				700
+#define MAX_SPEED 				1200
+#define ROTATION_SPEED 			850
+#define PID_KP 					30
+#define PID_KD 					50
+#define PID_ERROR_SETPOINT 		7
 #define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 /* ADC Private define */
-#define ADCREADTIMES 2
+#define ADCREADTIMES 			2
+#define SECTOR5ADDRESS 			0x08020000
 /* NeoPixel Private define */
-#define NUM_PIXELS 8
-#define PIXEL_BYTES 3  // RGB
+#define NUM_PIXELS 				8
+#define PIXEL_BYTES 			3  // RGB
 #define TOTAL_BYTES (NUM_PIXELS * PIXEL_BYTES * 8)
-#define RESET_BYTES 50  // Reset pulse (>50μs)
-#define CODE0 0b11100000
-#define CODE1 0b11111000
+#define RESET_BYTES 			50  // Reset pulse (>50μs)
+#define CODE0 					0b11100000
+#define CODE1 					0b11111000
 
 /* USER CODE END PD */
 
@@ -76,7 +77,7 @@ TIM_HandleTypeDef htim2;
 volatile typedef enum
 {
 	LINEFOLLOWER_STARTUP,
-	LINEFOLLOWER_IDEL,
+	LINEFOLLOWER_READY,
 	LINEFOLLOWER_CALBRATION,
 	LINEFOLLOWER_RUN
 }LineFollowerState_t;
@@ -86,7 +87,7 @@ volatile uint16_t IR_buff[4][8]={0};
 volatile uint8_t IR_Readed = FALSE;
 volatile uint8_t IR_DigValue = 0;
 volatile uint8_t previousIR_DigValue = 0;
-volatile uint8_t ADCReadsTime= ADCREADTIMES;
+volatile uint8_t ADCReadTimes= ADCREADTIMES;
 volatile uint8_t PID_Error_g8 =0;
 volatile uint8_t lastPID_Error_g8 =0;
 /* User button variables */
@@ -97,10 +98,16 @@ volatile int16_t speedCorrection = 0;
 /* Neopixel variables */
 volatile uint8_t NeoPixel_TXCplt = FALSE;
 uint8_t spi_buffer[TOTAL_BYTES + RESET_BYTES]={0};
-static const uint8_t blueColor5[24]= {CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
+static const uint8_t blueColor5[24]=
+		{CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
 		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
 		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE1}; //0b0000001 1U
-static const uint8_t offColor[24]= {CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
+static const uint8_t redColor5[24]=
+		{CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
+		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE1
+		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0}; //0b0000001 128U
+static const uint8_t offColor[24]=
+		{CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
 		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0
 		,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0,CODE0}; //0b00000000
 /* USER CODE END PV */
@@ -117,6 +124,7 @@ static void MX_TIM1_Init(void);
 static inline void Forwrad(uint16_t RSpeed,uint16_t LSpeed);
 uint32_t Flash_Write_Data (uint32_t StartSectorAddress, volatile uint16_t *Data);
 void NeoPixel_ShowBlue(uint8_t bluePixels);
+void NeoPixel_ShowRed(uint8_t redPixels);
 static inline void Right();
 static inline void Left();
 /* USER CODE END PFP */
@@ -150,6 +158,7 @@ static inline void Right()
 void LineFollowerCalibration(void)
 {
 	uint16_t i=0;
+	//Set maximum ADC value @min IR vector to get the minimum IR values
 	IR_buff[2][0]= 4095;
 	IR_buff[2][1]= 4095;
 	IR_buff[2][2]= 4095;
@@ -158,15 +167,10 @@ void LineFollowerCalibration(void)
 	IR_buff[2][5]= 4095;
 	IR_buff[2][6]= 4095;
 	IR_buff[2][7]= 4095;
-	for(i =0 ;i<10; i++)
-	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		HAL_Delay(100);
-	}
-	//Forwrad(1000,0);
+
+	//Start the calibration process to get the minimum and maximum ADC readings
 	for(i =0 ;i<65535; i++)
 	{
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 		IR_Readed = FALSE;
 		HAL_ADC_Start_DMA(&hadc1, (uint32_t*)IR_buff, 8);
 		while(IR_Readed != TRUE);
@@ -188,8 +192,8 @@ void LineFollowerCalibration(void)
 		IR_buff[2][5]= (IR_buff[0][5]<IR_buff[2][5])? IR_buff[0][5] : IR_buff[2][5];
 		IR_buff[2][6]= (IR_buff[0][6]<IR_buff[2][6])? IR_buff[0][6] : IR_buff[2][6];
 		IR_buff[2][7]= (IR_buff[0][7]<IR_buff[2][7])? IR_buff[0][7] : IR_buff[2][7];
-		HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 	}
+	//Averaging the minimum & maximum ADC values to ge the threshold value of every IR sensor
 	IR_buff[3][0]= IR_buff[2][0]+(IR_buff[1][0]-IR_buff[2][0])/2;
 	IR_buff[3][1]= IR_buff[2][1]+(IR_buff[1][1]-IR_buff[2][1])/2;
 	IR_buff[3][2]= IR_buff[2][2]+(IR_buff[1][2]-IR_buff[2][2])/2;
@@ -198,8 +202,13 @@ void LineFollowerCalibration(void)
 	IR_buff[3][5]= IR_buff[2][5]+(IR_buff[1][5]-IR_buff[2][5])/2;
 	IR_buff[3][6]= IR_buff[2][6]+(IR_buff[1][6]-IR_buff[2][6])/2;
 	IR_buff[3][7]= IR_buff[2][7]+(IR_buff[1][7]-IR_buff[2][7])/2;
-	Flash_Write_Data(0x08020000,&IR_buff[3][0]);
+	//Save the Calibration in flash at sector 5
+	Flash_Write_Data(SECTOR5ADDRESS,&IR_buff[3][0]);
 	Forwrad(0,0);
+	////Turn on Blue LED at the end of calibration for 500ms
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,0);
+	HAL_Delay(500);
+	HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,1);
 }
 
 uint32_t Flash_Write_Data (uint32_t StartSectorAddress, volatile uint16_t *Data)
@@ -296,110 +305,126 @@ uint8_t sum_l8=0;
 			HAL_GPIO_WritePin(IR_ON_GPIO_Port, IR_ON_Pin,0);
 			//Turn off Neopixel
 			NeoPixel_ShowBlue(0);
+			//Entering the Motor deriver in Low power mode
+			HAL_GPIO_WritePin(EEP_GPIO_Port, EEP_Pin, 0);
 			//Read stored calibration values from flash memory
-			Flash_Read_Data (0x08020000, &IR_buff[3][0], 8);
-			//Move to IDEL State
-			LineFollowerState= LINEFOLLOWER_IDEL;
+			Flash_Read_Data (SECTOR5ADDRESS, &IR_buff[3][0], 8);
+			//Waiting as Idle for SW1 pressed
+			while(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin));
+			HAL_Delay(500);
+			//Move to Ready State
+			LineFollowerState= LINEFOLLOWER_READY;
 			//Turn on IR Sensor
 			HAL_GPIO_WritePin(IR_ON_GPIO_Port, IR_ON_Pin,1);
 			break;
 
-		case  LINEFOLLOWER_IDEL:
+		case  LINEFOLLOWER_READY:
 			if(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 0)
 			{
 				HAL_Delay(300);
+				//Set Calibration time threshold to 3Sec
 				pressTime =HAL_GetTick()+3000;
+				//Waiting SW1 release
 				while(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 0)
 				{
+					//Make BLUE LED as Calibration time threshold indicator
 					(pressTime < HAL_GetTick())? HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin,0) : NULL;
 				}
-				//Start PWM for DC Motors
-				HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
-				HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
-				HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
-				HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+
 				if(pressTime < HAL_GetTick())
 				{
-					//Turn on IR Sensor
-					HAL_GPIO_WritePin(IR_ON_GPIO_Port, IR_ON_Pin,1);
-					LineFollowerCalibration();
 					LineFollowerState= LINEFOLLOWER_CALBRATION;
 				}
 				else
 				{
-
+					//Start PWM for DC Motors
+					HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_1);
+					HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_2);
+					HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_3);
+					HAL_TIM_PWM_Start(&htim1, TIM_CHANNEL_4);
+					//Exit the Motor deriver from Low power mode
+					HAL_GPIO_WritePin(EEP_GPIO_Port, EEP_Pin, 1);
 					LineFollowerState= LINEFOLLOWER_RUN;
 				}
 
 			}
 			else
 			{
+				//Show the Line position on Neopixel every 10mSec
 				HAL_ADC_Start_DMA(&hadc1, (uint32_t*)IR_buff, 8);
 				while(IR_Readed != TRUE);
 				IR_DigValue = ((IR_buff[0][0]>IR_buff[3][0])<<7)|((IR_buff[0][1]>IR_buff[3][1])<<6)|((IR_buff[0][2]>IR_buff[3][2])<<5)|((IR_buff[0][3]>IR_buff[3][3])<<4)|((IR_buff[0][4]>IR_buff[3][4])<<3)|((IR_buff[0][5]>IR_buff[3][5])<<2)|((IR_buff[0][6]>IR_buff[3][6])<<1)|(IR_buff[0][7]>IR_buff[3][7]);
-				(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowBlue(IR_DigValue)): NULL;
+				(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowRed(IR_DigValue)): NULL;
 				HAL_Delay(10);
 			}
 			break;
+
 		case LINEFOLLOWER_CALBRATION:
-			if(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin) == 0)
-			{
-				HAL_Delay(300);
-				//Move to IDEL State
-				LineFollowerState= LINEFOLLOWER_IDEL;
-			}
-			else
-			{
-				HAL_ADC_Start_DMA(&hadc1, (uint32_t*)IR_buff, 8);
-				while(IR_Readed != TRUE);
-				IR_DigValue = ((IR_buff[0][0]>IR_buff[3][0])<<7)|((IR_buff[0][1]>IR_buff[3][1])<<6)|((IR_buff[0][2]>IR_buff[3][2])<<5)|((IR_buff[0][3]>IR_buff[3][3])<<4)|((IR_buff[0][4]>IR_buff[3][4])<<3)|((IR_buff[0][5]>IR_buff[3][5])<<2)|((IR_buff[0][6]>IR_buff[3][6])<<1)|(IR_buff[0][7]>IR_buff[3][7]);
-				(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowBlue(IR_DigValue)): NULL;
-				HAL_Delay(10);
-			}
+			//Turn on Blue Light on Neopixel
+			NeoPixel_ShowBlue(0b11111111);
+			//Implement calibration process
+			LineFollowerCalibration();
+			//Turn off Blue Light
+			NeoPixel_ShowBlue(0b00000000);
+			//Return to Ready State
+			LineFollowerState= LINEFOLLOWER_READY;
 			break;
+
 		case LINEFOLLOWER_RUN:
+			//Start IR sensor Read using DMA
 			HAL_ADC_Start_DMA(&hadc1, (uint32_t*)IR_buff, 8);
+			//Waiting ADC finish
 			while(IR_Readed != TRUE);
+			//Convert the IR Sensor ADC readed value to digital values
 			IR_DigValue = ((IR_buff[0][0]>IR_buff[3][0])<<7)|((IR_buff[0][1]>IR_buff[3][1])<<6)|((IR_buff[0][2]>IR_buff[3][2])<<5)|((IR_buff[0][3]>IR_buff[3][3])<<4)|((IR_buff[0][4]>IR_buff[3][4])<<3)|((IR_buff[0][5]>IR_buff[3][5])<<2)|((IR_buff[0][6]>IR_buff[3][6])<<1)|(IR_buff[0][7]>IR_buff[3][7]);
-			//Validate the IR Value
+			//Validate the IR Sensor Value
 			if((IR_DigValue!=0) && (IR_DigValue!=255) && (IR_DigValue == previousIR_DigValue) && ((IR_DigValue&(IR_DigValue+(IR_DigValue&-IR_DigValue)))==0))
 			{
-				if(ADCReadsTime == 0)
+				//Waiting ADCReadTimes finish
+				if(ADCReadTimes == 0)
 				{
 					switch(IR_DigValue)
 					{
 					case 0b00000001:
+						//Rotate Left
 						Left();
 						lastPID_Error_g8 =2;
 						break;
 					case 0b10000000:
+						//Rotate Right
 						Right();
 						lastPID_Error_g8 =14;
 						break;
 					default:
 						for(i_l8=0,sum_l8=0 ; i_l8<8 ; i_l8++)
 						{
+							//Implement summation with weight 2
 						    (IR_DigValue & 1<<i_l8)?(sum_l8+=(i_l8+1)*2): 0;
 						}
+						//Calculate PID Error value and correction value
 						PID_Error_g8 = sum_l8/__builtin_popcount(IR_DigValue);
-						speedCorrection= PID_KP * (PID_Error_g8-PID_ERROR_SETPOINT)+ PID_KD*(PID_Error_g8 - lastPID_Error_g8);  ;
+						speedCorrection= PID_KP * (PID_Error_g8-PID_ERROR_SETPOINT)+ PID_KD*(PID_Error_g8 - lastPID_Error_g8);
+						//Go forward with calculated speed values and Speed constrains
 						Forwrad(CONSTRAIN((SET_SPEED-speedCorrection),MIN_SPEED,MAX_SPEED),CONSTRAIN((SET_SPEED+speedCorrection),MIN_SPEED,MAX_SPEED));
 					break;
 					}
-					(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowBlue(IR_DigValue)): NULL;
-					ADCReadsTime = ADCREADTIMES;
+					//Show the Line position on Neopixel
+					(NeoPixel_TXCplt == FALSE)? (NeoPixel_ShowRed(IR_DigValue)): NULL;
+					//Reload the ADCReadTimes
+					ADCReadTimes = ADCREADTIMES;
+					//Save last PID error value
 					lastPID_Error_g8 =PID_Error_g8;
 				}
 				else
 				{
-					ADCReadsTime--;
+					ADCReadTimes--;
 				}
 
 			}
 			else
 			{
 				previousIR_DigValue =IR_DigValue;
-				ADCReadsTime = ADCREADTIMES;
+				ADCReadTimes = ADCREADTIMES;
 			}
 
 			HAL_Delay(1);
@@ -851,7 +876,33 @@ void NeoPixel_ShowBlue(uint8_t bluePixels)
 	NeoPixel_TXCplt = TRUE;
 	HAL_SPI_Transmit_DMA(&hspi2, spi_buffer, buffer_idx);
 }
+void NeoPixel_ShowRed(uint8_t redPixels)
+{
+	uint16_t buffer_idx = 0;
 
+	// Convert pixel data to SPI timing patterns
+	for (int pixel = 0; pixel < NUM_PIXELS; pixel++) {
+		if (redPixels & (1 << pixel)) {
+			// Turn on pixel
+			memcpy(&spi_buffer[buffer_idx], redColor5, 24);
+			buffer_idx+=24;
+		} else {
+			// Turn off pixel
+			memcpy(&spi_buffer[buffer_idx], offColor, 24);
+			buffer_idx+=24;
+		}
+	}
+
+
+	// Add reset pulse (low for >50μs)
+	for (int i = 0; i < RESET_BYTES; i++) {
+		spi_buffer[buffer_idx++] = 0x00;
+	}
+
+	// Transmit via SPI with DMA
+	NeoPixel_TXCplt = TRUE;
+	HAL_SPI_Transmit_DMA(&hspi2, spi_buffer, buffer_idx);
+}
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef *hadc)
 {
