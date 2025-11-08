@@ -36,13 +36,13 @@
 #define TRUE 					1
 #define FALSE 					0
 /* DC MOTORS Private define */
-#define SET_SPEED 				1100
+#define SET_SPEED 				1050
 #define MIN_SPEED 				700
 #define MAX_SPEED 				1200
 #define ROTATION_SPEED 			850
 #define PID_KP 					30
 #define PID_KD 					50
-#define PID_ERROR_SETPOINT 		7
+#define PID_ERROR_SETPOINT 		9
 #define CONSTRAIN(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 /* ADC Private define */
 #define ADCREADTIMES 			2
@@ -90,6 +90,7 @@ volatile uint8_t previousIR_DigValue = 0;
 volatile uint8_t ADCReadTimes= ADCREADTIMES;
 volatile uint8_t PID_Error_g8 =0;
 volatile uint8_t lastPID_Error_g8 =0;
+volatile uint8_t lostCounter =0;
 /* User button variables */
 volatile uint64_t pressTime=0;
 /* PWM speed variables */
@@ -150,7 +151,7 @@ static inline void Left()
 static inline void Right()
 {
 
-		TIM1->CCR1 = ROTATION_SPEED+40;
+		TIM1->CCR1 = ROTATION_SPEED;
 		TIM1->CCR3 = 0;
 		TIM1->CCR2 = 0;
 		TIM1->CCR4 = MAX_SPEED;
@@ -311,7 +312,7 @@ uint8_t sum_l8=0;
 			Flash_Read_Data (SECTOR5ADDRESS, &IR_buff[3][0], 8);
 			//Waiting as Idle for SW1 pressed
 			while(HAL_GPIO_ReadPin(SW1_GPIO_Port, SW1_Pin));
-			HAL_Delay(500);
+			HAL_Delay(500); //Delay for software switch debouncing
 			//Move to Ready State
 			LineFollowerState= LINEFOLLOWER_READY;
 			//Turn on IR Sensor
@@ -386,14 +387,16 @@ uint8_t sum_l8=0;
 					switch(IR_DigValue)
 					{
 					case 0b00000001:
+					case 0b00000011:
 						//Rotate Left
 						Left();
 						lastPID_Error_g8 =2;
 						break;
 					case 0b10000000:
+					case 0b11000000:
 						//Rotate Right
 						Right();
-						lastPID_Error_g8 =14;
+						lastPID_Error_g8 =16;
 						break;
 					default:
 						for(i_l8=0,sum_l8=0 ; i_l8<8 ; i_l8++)
@@ -414,6 +417,22 @@ uint8_t sum_l8=0;
 					ADCReadTimes = ADCREADTIMES;
 					//Save last PID error value
 					lastPID_Error_g8 =PID_Error_g8;
+				}
+				//LOST
+				else if(IR_DigValue==0)
+				{
+					if((lastPID_Error_g8 - PID_ERROR_SETPOINT>0))
+					{
+						//Rotate Right
+						Right();
+						lastPID_Error_g8 =16;
+					}
+					else if((lastPID_Error_g8 - PID_ERROR_SETPOINT<0))
+					{
+						//Rotate Left
+						Left();
+						lastPID_Error_g8 =2;
+					}
 				}
 				else
 				{
